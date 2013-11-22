@@ -118,7 +118,7 @@ void write_pid(const char *path, pid_t pid)
 {
 	int fd;
 
-	fd = open(path, O_WRONLY);
+	fd = open(path, O_WRONLY | O_CREAT);
 	write(fd, &pid, sizeof(pid));
 	close(fd);
 }
