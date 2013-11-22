@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <sys/types.h>
-#include <uuid/uuid.h>
 #include "command.h"
 #include "exec.h"
 
