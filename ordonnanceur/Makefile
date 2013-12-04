@@ -15,4 +15,4 @@ clean:
 	@rm -rf *.o
 
 mrproper: clean
-	@rm -rf lanceur ordo
+	@rm -rf lanceur ordo ordo.dat pid.dat

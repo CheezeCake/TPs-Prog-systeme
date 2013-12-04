@@ -118,10 +118,8 @@ void write_pid(const char *path, pid_t pid)
 {
 	int fd;
 
-	fd = open(path, O_WRONLY | O_CREAT, S_IRWXU);
-	lockf(fd, F_LOCK, sizeof(pid));
+	fd = open(path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
 	write(fd, &pid, sizeof(pid));
 	lseek(fd, 0, SEEK_SET);
-	lockf(fd, F_ULOCK, sizeof(pid));
 	close(fd);
 }
