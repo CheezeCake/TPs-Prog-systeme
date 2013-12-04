@@ -1,5 +1,5 @@
 CC=cc
-CFLAGS=-Wall -pedantic
+CFLAGS=-Wall -ansi -pedantic
 TARGET=myshell
 
 all: main.o command.o shell.o

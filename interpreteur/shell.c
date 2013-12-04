@@ -15,7 +15,7 @@ void exec_command(Command *cmd)
 
 	/* création des pipes */
 	p = calloc(sizeof(int*), cmd->nb_members-1);
-	for(int i = 0; i < cmd->nb_members-1; i++)
+	for(i = 0; i < cmd->nb_members-1; i++)
 	{
 		p[i] = calloc(sizeof(int), 2);
 		pipe(p[i]);
