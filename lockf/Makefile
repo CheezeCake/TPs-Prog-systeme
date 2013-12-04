@@ -12,4 +12,4 @@ Reserve-v2: exercice3.c
 .PHONY: mrproper
 
 mrproper:
-	@rm -f Init Reserve-v1 Reserve-v2
+	@rm -f Init Reserve-v1 Reserve-v2 base.dat
