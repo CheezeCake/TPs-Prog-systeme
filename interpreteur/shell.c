@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/wait.h>
-#include "exec.h"
+#include "shell.h"
 
 /*
  * TEST:

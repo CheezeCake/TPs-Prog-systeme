@@ -5,7 +5,7 @@
 #include <pwd.h>
 #include <sys/types.h>
 #include "command.h"
-#include "exec.h"
+#include "shell.h"
 
 void setup_prompt(char*, const char*, const char*);
 int cmd_exit(const char*, int*);

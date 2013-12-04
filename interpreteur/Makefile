@@ -2,7 +2,7 @@ CC=cc
 CFLAGS=-Wall -pedantic
 TARGET=myshell
 
-all: main.o command.o exec.o
+all: main.o command.o shell.o
 	$(CC) $^ -o $(TARGET)
 
 main.o: main.c
