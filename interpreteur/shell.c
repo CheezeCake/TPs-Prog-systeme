@@ -69,7 +69,7 @@ void exec_command(Command *cmd)
 				fd = open(cmd->redirect[i][STDIN], O_RDONLY);
 				if(fd == -1)
 				{
-					fprintf(stderr, "impossible d'ouvrir %s\n%s",
+					fprintf(stderr, "impossible d'ouvrir %s: %s\n",
 							cmd->redirect[i][STDIN], strerror(errno));
 					exit(1);
 				}
@@ -90,7 +90,7 @@ void exec_command(Command *cmd)
 
 				if(fd == -1)
 				{
-					fprintf(stderr, "impossible d'ouvrir %s\n%s",
+					fprintf(stderr, "impossible d'ouvrir %s: %s\n",
 							cmd->redirect[i][STDOUT], strerror(errno));
 					exit(1);
 				}
@@ -111,7 +111,7 @@ void exec_command(Command *cmd)
 
 				if(fd == -1)
 				{
-					fprintf(stderr, "impossible d'ouvrir %s\n%s",
+					fprintf(stderr, "impossible d'ouvrir %s: %s\n",
 							cmd->redirect[i][STDERR], strerror(errno));
 					exit(1);
 				}
