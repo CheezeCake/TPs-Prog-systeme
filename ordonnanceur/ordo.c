@@ -12,6 +12,7 @@ Process_list l;
 void new_process(int sig)
 {
 	pidn = read_pid("pid.dat");
+	printf("nex process: %d\n", pidn);
 	kill(pidn, SIGSTOP);
 	add_process(&l, pidn);
 

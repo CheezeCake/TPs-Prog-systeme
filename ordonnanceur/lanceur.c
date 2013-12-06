@@ -6,45 +6,52 @@
 #include <errno.h>
 #include "utils.h"
 
-int main()
+pid_t ordo;
+pid_t pid;
+
+void suppr(int sig)
 {
-	pid_t ordo;
-	pid_t pid;
-	char c;
+	write_pid("pid.dat", pid);
+	kill(ordo, SIGUSR2);
+	printf("Envoi à l'ordo de %d\n", pid);
+	kill(pid, SIGKILL);
+}
+
+int main(int argc, char **argv)
+{
+	int ret;
+	signal(SIGINT, suppr);
 
 	ordo = read_pid("ordo.dat");
 	printf("pid ordo = %d\n", ordo);
 
-	while(1)
+	if(argc == 1)
 	{
-		c = '\0';
-		pid = -1;
+		fprintf(stderr, "pas de programme specifié\n"
+				"usage: ./lanceur prog [prog args]\n");
+		exit(0);
+	}
 
-		do
-		{
-			printf("ajouter (a), supprimer (s): ");
-			scanf("%c", &c);
-		} while(c != 'a' && c != 's');
+	if((pid = fork()) == -1)
+	{
+		perror("erreur fork");
+		exit(1);
+	}
 
-		do
-		{
-			printf("pid: ");
-			scanf("%d", &pid);
-		} while(pid < 0);
-
+	if(pid == 0)
+	{
+		ret = execvp(argv[1], argv+1);
+		if(ret == -1)
+			exit(2);
+	}
+	else
+	{
 		write_pid("pid.dat", pid);
-		if(c == 'a')
-		{
-			printf("Envoi à l'ordo de %d\n", pid);
-			kill(ordo, SIGUSR1);
-		}
-		else
-		{
-			printf("Fin de %d, envoi de la notification à l'ordo\n", pid);
-			kill(ordo, SIGUSR2);
-		}
+		printf("Envoi à l'ordo de %d\n", pid);
+		kill(ordo, SIGUSR1);
 
-		getchar();
+		wait(NULL);
+		suppr(0);
 	}
 
 	return 0;
