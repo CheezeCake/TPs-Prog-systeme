@@ -1,11 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
 #include <unistd.h>
 #include <signal.h>
 #include "utils.h"
-
-void write_pid(const char *path, pid_t pid);
 
 pid_t pidn; /* pid new process */
 pid_t pidt; /* pid term process */
@@ -15,6 +12,7 @@ Process_list l;
 void new_process(int sig)
 {
 	pidn = read_pid("pid.dat");
+	printf("nex process: %d\n", pidn);
 	kill(pidn, SIGSTOP);
 	add_process(&l, pidn);
 
@@ -68,14 +66,4 @@ int main()
 		pause();
 
 	return 0;
-}
-
-void write_pid(const char *path, pid_t pid)
-{
-	int fd;
-
-	fd = open(path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
-	write(fd, &pid, sizeof(pid));
-	lseek(fd, 0, SEEK_SET);
-	close(fd);
 }

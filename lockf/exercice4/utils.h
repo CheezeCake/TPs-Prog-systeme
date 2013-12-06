@@ -26,5 +26,6 @@ int empty(Process_list*);
 pid_t get_process(Process_list*);
 
 pid_t read_pid(const char*);
+void write_pid(const char*, pid_t);
 
 #endif

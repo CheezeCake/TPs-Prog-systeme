@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <errno.h>
 #include "utils.h"
 
 Process* create_process(pid_t pid)
@@ -112,4 +113,23 @@ pid_t read_pid(const char *path)
 	close(fd);
 
 	return pid;
+}
+
+void write_pid(const char *path, pid_t pid)
+{
+	int fd;
+	int ret;
+
+	fd = open(path, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
+
+	/* tant que le fichier est locké attendre */
+	while((ret = lockf(fd, F_TEST, sizeof(pid_t))) && errno == EAGAIN)
+		sleep(1);
+
+	/* lock, write, unlock */
+	lockf(fd, F_LOCK, sizeof(pid_t));
+	write(fd, &pid, sizeof(pid));
+	lseek(fd, 0, SEEK_SET);
+	lockf(fd, F_ULOCK, sizeof(pid_t));
+	close(fd);
 }
