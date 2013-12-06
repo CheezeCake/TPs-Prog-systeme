@@ -43,6 +43,7 @@ int main()
 		printf("----------\n");
 
 		exec_command(&cmd);
+		destroy_command(&cmd);
 	}
 
 	return 0;
