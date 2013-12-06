@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <sys/wait.h>
 #include "shell.h"
 
@@ -12,6 +13,7 @@ void exec_command(Command *cmd)
 	int **p = NULL;
 	int i, j;
 	int ret;
+	int fd;
 
 	/* création des pipes */
 	p = calloc(sizeof(int*), cmd->nb_members-1);
@@ -57,7 +59,70 @@ void exec_command(Command *cmd)
 				close(p[i][1]);
 			}
 
-			/* executer la commande */
+			/*
+			 * redirection depuis/vers fichiers
+			 */
+
+			/* STDIN */
+			if(cmd->redirect[i][STDIN] != NULL)
+			{
+				fd = open(cmd->redirect[i][STDIN], O_RDONLY);
+				if(fd == -1)
+				{
+					fprintf(stderr, "impossible d'ouvrir %s\n%s",
+							cmd->redirect[i][STDIN], strerror(errno));
+					exit(1);
+				}
+
+				dup2(fd, STDIN_FILENO);
+				close(fd);
+			}
+
+			/* STDOUT */
+			if(cmd->redirect[i][STDOUT] != NULL)
+			{
+				if(cmd->type_redirect[i][STDOUT] == APPEND)
+					fd = open(cmd->redirect[i][STDOUT],
+							O_CREAT | O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR);
+				else
+					fd = open(cmd->redirect[i][STDOUT],
+							O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
+
+				if(fd == -1)
+				{
+					fprintf(stderr, "impossible d'ouvrir %s\n%s",
+							cmd->redirect[i][STDOUT], strerror(errno));
+					exit(1);
+				}
+
+				dup2(fd, STDOUT_FILENO);
+				close(fd);
+			}
+
+			/* STDERR */
+			if(cmd->redirect[i][STDERR] != NULL)
+			{
+				if(cmd->type_redirect[i][STDERR] == APPEND)
+					fd = open(cmd->redirect[i][STDERR],
+							O_CREAT | O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR);
+				else
+					fd = open(cmd->redirect[i][STDERR],
+							O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
+
+				if(fd == -1)
+				{
+					fprintf(stderr, "impossible d'ouvrir %s\n%s",
+							cmd->redirect[i][STDERR], strerror(errno));
+					exit(1);
+				}
+
+				dup2(fd, STDERR_FILENO);
+				close(fd);
+			}
+
+			/*
+			 * executer la commande
+			 */
 			ret = execvp(cmd->args[i][0], cmd->args[i]);
 
 			if(ret == -1)
