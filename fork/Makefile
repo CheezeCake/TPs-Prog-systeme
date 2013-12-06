@@ -9,7 +9,12 @@ timeout: exercice2.c
 foreach: exercice3.c
 	cc $^ -o $@
 
-.PHONY: mrproper
+exercice4: exercice4.c
+	cc $^ -o $@
+
+.PHONY: mrproper clean
+
+clean: mrproper
 
 mrproper:
-	@rm -f exercice1 timeout foreach
+	@rm -f exercice1 timeout foreach exercice4
