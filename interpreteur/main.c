@@ -38,6 +38,7 @@ int main()
 		aff_members(&cmd);
 		parse_args(&cmd);
 		aff_args(&cmd);
+		aff_redirect(&cmd);
 
 		printf("----------\n");
 

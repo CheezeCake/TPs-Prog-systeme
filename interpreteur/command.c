@@ -24,8 +24,9 @@ void destroy_command(Command *cmd)
 	for(i = 0; i < cmd->nb_members; i++)
 	{
 		free(cmd->members[i]);
+		free(cmd->redirect[i][STDIN]);
+		free(cmd->redirect[i][STDOUT]);
 		free(cmd->redirect[i]);
-		free(cmd->type_redirect[i]);
 
 		for(j = 0; j < cmd->nb_args[i]; j++)
 			free(cmd->args[i][j]);
@@ -48,6 +49,8 @@ int parse_members(char *initial_str, Command *cmd)
 	/*cmd->initial_str = strdup(initial_str);*/
 	cmd->nb_members = countchar(initial_str, '|')+1;
 	cmd->members = calloc(cmd->nb_members, sizeof(char*));
+	cmd->redirect = calloc(cmd->nb_members, sizeof(char**));
+	cmd->type_redirect = calloc(cmd->nb_members, sizeof(int*));
 
 	for(token = strtok(initial_str, "|");
 			token;
@@ -69,7 +72,7 @@ int parse_members(char *initial_str, Command *cmd)
 	return 0;
 }
 
-void aff_members(Command *cmd)
+void aff_members(const Command *cmd)
 {
 	int i;
 	for(i = 0; i < cmd->nb_members; i++)
@@ -84,6 +87,7 @@ int parse_args(Command *cmd)
 
 	cmd->args = calloc(cmd->nb_members, sizeof(char**));
 	cmd->nb_args = calloc(cmd->nb_members, sizeof(char*));
+	cmd->redirect = calloc(cmd->nb_members, sizeof(char**));
 
 	for(i = 0; i < cmd->nb_members; i++)
 	{
@@ -92,11 +96,22 @@ int parse_args(Command *cmd)
 
 		cmd->nb_args[i] = countwords(member)+1;
 		cmd->args[i] = calloc(cmd->nb_args[i], sizeof(char*));
+
+		cmd->redirect[i] = calloc(2, sizeof(char*));
+
 		for(token = strtok(member, " ");
 				token;
 				token = strtok(NULL, " "))
 		{
-			cmd->args[i][j++] = strdup(token);
+			if(strcmp(token, ">") == 0)
+			{
+				cmd->redirect[i][STDOUT] = strdup(strtok(NULL, " "));
+				cmd->type_redirect[i] = NORMAL;
+			}
+			else if(strcmp(token, "<") == 0)
+				cmd->redirect[i][STDIN] = strdup(strtok(NULL, " "));
+			else
+				cmd->args[i][j++] = strdup(token);
 		}
 
 		cmd->args[i][j] = NULL;
@@ -105,7 +120,7 @@ int parse_args(Command *cmd)
 	return 0;
 }
 
-void aff_args(Command *cmd)
+void aff_args(const Command *cmd)
 {
 	int i, j;
 	for(i = 0; i < cmd->nb_members; i++)
@@ -113,6 +128,16 @@ void aff_args(Command *cmd)
 		for(j = 0; j < cmd->nb_args[i]; j++)
 			printf("args[%d][%d] = '%s' ", i, j, cmd->args[i][j]);
 		printf("\n");
+	}
+}
+
+void aff_redirect(const Command *cmd)
+{
+	int i;
+	for(i = 0; i < cmd->nb_members; i++)
+	{
+		printf("redirect[%d][STDIN] = '%s'\n", i, cmd->redirect[i][STDIN]);
+		printf("redirect[%d][STDOUT] = '%s'\n", i, cmd->redirect[i][STDOUT]);
 	}
 }
 
