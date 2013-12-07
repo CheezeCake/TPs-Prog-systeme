@@ -25,7 +25,11 @@ void exec_command(Command *cmd)
 
 	for(i = 0; i < cmd->nb_members; i++)
 	{
-		child = fork();
+		if((child = fork()) == -1)
+		{
+			perror("erreur fork()");
+			exit(1);
+		}
 
 		if(child == 0)
 		{
