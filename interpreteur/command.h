@@ -22,6 +22,8 @@ typedef struct Command
 
 	char ***redirect; /* chemins fichiers ou rediriger */
 	int **type_redirect; /* type redirection (APPEND ou non) */
+
+	int background; /* doit etre lancée en background (&) */
 } Command;
 
 void init_command(Command*);

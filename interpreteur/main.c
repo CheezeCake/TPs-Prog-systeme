@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
 #include <pwd.h>
 #include <sys/types.h>
 #include "command.h"
@@ -10,6 +11,7 @@
 void setup_prompt(char*, const char*, const char*);
 int cmd_exit(const char*, int*);
 void delete_ending_newline(char*);
+void sigchld_handler(int);
 
 int main()
 {
@@ -19,6 +21,9 @@ int main()
 	char prompt[1024];
 	char hostname[256];
 	char cwd[256];
+	char *fgetsret = NULL;
+
+	signal(SIGCHLD, sigchld_handler);
 
 	gethostname(hostname, 256);
 	getcwd(cwd, 256);
@@ -27,23 +32,36 @@ int main()
 	while(1)
 	{
 		printf("%s", prompt);
-		fgets(input, CMD_MAX_LENGTH, stdin);
+		fgetsret = fgets(input, CMD_MAX_LENGTH, stdin);
+		if(fgetsret == NULL)
+			return 0;
+
 		delete_ending_newline(input);
 
-		if(cmd_exit(input, &exit_code))
-			return exit_code;
+		printf("input: '%s'\n", input);
+		if(strlen(input) != 0)
+		{
+			if(cmd_exit(input, &exit_code))
+				return exit_code;
 
-		init_command(&cmd);
-		parse_members(input, &cmd);
-		aff_members(&cmd);
-		parse_args(&cmd);
-		aff_args(&cmd);
-		aff_redirect(&cmd);
+			init_command(&cmd);
+			if(parse_members(input, &cmd) == 0 && parse_args(&cmd) == 0)
+			{
+				/*
+				   aff_members(&cmd);
+				   aff_args(&cmd);
+				   aff_redirect(&cmd);
 
-		printf("----------\n");
+				   printf("----------\n");
+				   */
 
-		exec_command(&cmd);
-		destroy_command(&cmd);
+				exec_command(&cmd);
+			}
+
+			destroy_command(&cmd);
+		}
+
+		*input = '\0';
 	}
 
 	return 0;
@@ -64,7 +82,7 @@ int cmd_exit(const char *str, int *exit_code)
 
 	tok = strtok(str2, " ");
 
-	if(strcmp(tok, "exit") != 0)
+	if(tok == NULL || strcmp(tok, "exit") != 0)
 		return 0;
 
 	*exit_code = 0;
@@ -79,7 +97,15 @@ void delete_ending_newline(char *str)
 {
 	size_t len;
 
-	len = strlen(str);
-	if(str[len-1] == '\n')
-		str[len-1] = '\0';
+	if(str != NULL)
+	{
+		len = strlen(str);
+		if(str[len-1] == '\n')
+			str[len-1] = '\0';
+	}
+}
+
+void sigchld_handler(int sig)
+{
+	wait(NULL);
 }

@@ -15,6 +15,8 @@ void init_command(Command *cmd)
 
 	cmd->redirect = NULL;
 	cmd->type_redirect = NULL;
+
+	cmd->background = 0;
 }
 
 void destroy_command(Command *cmd)
@@ -23,16 +25,26 @@ void destroy_command(Command *cmd)
 
 	for(i = 0; i < cmd->nb_members; i++)
 	{
-		free(cmd->redirect[i][STDIN]);
-		free(cmd->redirect[i][STDOUT]);
-		free(cmd->redirect[i][STDERR]);
-		free(cmd->redirect[i]);
-		free(cmd->type_redirect[i]);
-		free(cmd->members[i]);
+		if(cmd->redirect != NULL && cmd->redirect[i] != NULL)
+		{
+			free(cmd->redirect[i][STDIN]);
+			free(cmd->redirect[i][STDOUT]);
+			free(cmd->redirect[i][STDERR]);
+			free(cmd->redirect[i]);
+		}
 
-		for(j = 0; j < cmd->nb_args[i]; j++)
-			free(cmd->args[i][j]);
-		free(cmd->args[i]);
+		if(cmd->type_redirect != NULL && cmd->type_redirect[i] != NULL)
+			free(cmd->type_redirect[i]);
+
+		if(cmd->members != NULL && cmd->members[i] != NULL)
+			free(cmd->members[i]);
+
+		if(cmd->args != NULL && cmd->args[i] != NULL)
+		{
+			for(j = 0; j < cmd->nb_args[i]; j++)
+				free(cmd->args[i][j]);
+			free(cmd->args[i]);
+		}
 	}
 
 	/*free(cmd->initial_str);*/
@@ -44,14 +56,17 @@ void destroy_command(Command *cmd)
 
 int parse_members(char *initial_str, Command *cmd)
 {
-	int i = 0;
-	size_t len;
+	int i;
+	int len;
 	char *token = NULL;
 
 	/*cmd->initial_str = strdup(initial_str);*/
 	cmd->nb_members = countchar(initial_str, '|')+1;
 	cmd->members = calloc(cmd->nb_members, sizeof(char*));
+	for(i = 0; i < cmd->nb_members; i++)
+		cmd->members[i] = NULL;
 
+	i = 0;
 	for(token = strtok(initial_str, "|");
 			token;
 			token = strtok(NULL, "|"))
@@ -63,6 +78,9 @@ int parse_members(char *initial_str, Command *cmd)
 			++token;
 
 		len = strlen(token)-1;
+		if(len <= 0)
+			return 1;
+
 		while(token[len] && token[len] == ' ')
 			token[len--] = '\0';
 
@@ -86,17 +104,24 @@ int parse_args(Command *cmd)
 	char *member = NULL;
 
 	cmd->args = calloc(cmd->nb_members, sizeof(char**));
-	cmd->nb_args = calloc(cmd->nb_members, sizeof(char*));
+	cmd->nb_args = calloc(cmd->nb_members, sizeof(int*));
 	cmd->redirect = calloc(cmd->nb_members, sizeof(char**));
 	cmd->type_redirect = calloc(cmd->nb_members, sizeof(int*));
+	for(j = 0; j < cmd->nb_members; j++)
+	{
+		cmd->args[j] = NULL;
+		cmd->redirect[j] = NULL;
+		cmd->type_redirect[j] = NULL;
+	}
 
 	for(i = 0; i < cmd->nb_members; i++)
 	{
-		j = 0;
 		member = strdup(cmd->members[i]);
 
 		cmd->nb_args[i] = countwords(member)+1;
 		cmd->args[i] = calloc(cmd->nb_args[i], sizeof(char*));
+		for(j = 0; j < cmd->nb_args[i]; j++)
+			cmd->args[i][j] = NULL;
 
 		cmd->redirect[i] = calloc(3, sizeof(char*));
 		cmd->redirect[i][STDIN] = NULL;
@@ -107,12 +132,26 @@ int parse_args(Command *cmd)
 		cmd->type_redirect[i][STDOUT] = NORMAL;
 		cmd->type_redirect[i][STDERR] = NORMAL;
 
+		j = 0;
 		for(token = strtok(member, " ");
 				token;
 				token = strtok(NULL, " "))
 		{
 			if(!parse_redirect(i, token, cmd))
 				cmd->args[i][j++] = strdup(token);
+		}
+
+		if(strcmp(cmd->args[i][j-1], "&") == 0)
+		{
+			if(cmd->nb_members > 1)
+			{
+				fprintf(stderr, "pas executable en background\n");
+				return 1;
+			}
+
+			cmd->background = 1;
+			free(cmd->args[i][j-1]);
+			cmd->args[i][j-1] = NULL;
 		}
 
 		cmd->args[i][j] = NULL;

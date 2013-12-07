@@ -73,8 +73,8 @@ void exec_command(Command *cmd)
 				fd = open(cmd->redirect[i][STDIN], O_RDONLY);
 				if(fd == -1)
 				{
-					fprintf(stderr, "impossible d'ouvrir %s: %s\n",
-							cmd->redirect[i][STDIN], strerror(errno));
+					fprintf(stderr, "%s: %s\n",
+							strerror(errno), cmd->redirect[i][STDIN]);
 					exit(1);
 				}
 
@@ -94,8 +94,8 @@ void exec_command(Command *cmd)
 
 				if(fd == -1)
 				{
-					fprintf(stderr, "impossible d'ouvrir %s: %s\n",
-							cmd->redirect[i][STDOUT], strerror(errno));
+					fprintf(stderr, "%s: %s\n",
+							strerror(errno), cmd->redirect[i][STDOUT]);
 					exit(1);
 				}
 
@@ -115,8 +115,8 @@ void exec_command(Command *cmd)
 
 				if(fd == -1)
 				{
-					fprintf(stderr, "impossible d'ouvrir %s: %s\n",
-							cmd->redirect[i][STDERR], strerror(errno));
+					fprintf(stderr, "%s: %s\n",
+							strerror(errno), cmd->redirect[i][STDERR]);
 					exit(1);
 				}
 
@@ -130,8 +130,7 @@ void exec_command(Command *cmd)
 			ret = execvp(cmd->args[i][0], cmd->args[i]);
 
 			if(ret == -1)
-				fprintf(stderr, "Erreur execution: %s\n%s", cmd->args[i][0],
-						strerror(errno));
+				fprintf(stderr, "Command not found: %s\n", cmd->args[i][0]);
 			exit(errno);
 		}
 	}
@@ -146,7 +145,13 @@ void exec_command(Command *cmd)
 	free(p);
 
 	/* wait */
-	for(i = 0; i < cmd->nb_members; i++)
-		wait(NULL);
+	if(!cmd->background)
+	{
+		printf("wait\n");
+		for(i = 0; i < cmd->nb_members; i++)
+			wait(NULL);
+	}
+	else
+		printf("[%d]\n", child);
 }
 
