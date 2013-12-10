@@ -147,7 +147,6 @@ void exec_command(Command *cmd)
 	/* wait */
 	if(!cmd->background)
 	{
-		printf("wait\n");
 		for(i = 0; i < cmd->nb_members; i++)
 			wait(NULL);
 	}

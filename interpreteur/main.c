@@ -38,7 +38,6 @@ int main()
 
 		delete_ending_newline(input);
 
-		printf("input: '%s'\n", input);
 		if(strlen(input) != 0)
 		{
 			if(cmd_exit(input, &exit_code))
