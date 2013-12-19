@@ -2,8 +2,10 @@ CC=cc
 CFLAGS=-Wall -pedantic
 TARGET=myshell
 
-all: main.o command.o shell.o
-	$(CC) $^ -o $(TARGET)
+all: $(TARGET)
+
+$(TARGET): main.o command.o shell.o
+	$(CC) $^ -o $@
 
 main.o: main.c
 	$(CC) -c $^ $(CFLAGS)
