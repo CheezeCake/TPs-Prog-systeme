@@ -23,9 +23,6 @@ int main()
 	signal(SIGALRM, nettoyer);
 	signal(SIGINT, quit_client);
 
-	pipe(p1);
-	pipe(p2);
-
 	demarrer_srv();
 
 	while(1)
@@ -47,6 +44,8 @@ void demarrer_srv()
 {
 	printf("Demarrage du serveur par %d\n", getpid());
 
+	pipe(p1);
+	pipe(p2);
 	fils = fork();
 
 	if(fils == 0)
