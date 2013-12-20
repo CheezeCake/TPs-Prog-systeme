@@ -120,14 +120,15 @@ void nettoyer()
 		printf("Kill du serveur (%d)\n", fils);
 		kill(fils, SIGKILL);
 		fils = 0;
+
+		/* fermer pipes */
+		close(p1[1]);
+		close(p2[0]);
 	}
 }
 
 void quit_client(int sig)
 {
 	nettoyer();
-	close(p1[1]);
-	close(p2[0]);
-
 	exit(0);
 }
