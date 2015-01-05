@@ -90,7 +90,7 @@ void exec_command(Command *cmd)
 							O_CREAT | O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR);
 				else
 					fd = open(cmd->redirect[i][STDOUT],
-							O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
+							O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR);
 
 				if(fd == -1)
 				{
@@ -111,7 +111,7 @@ void exec_command(Command *cmd)
 							O_CREAT | O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR);
 				else
 					fd = open(cmd->redirect[i][STDERR],
-							O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
+							O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR);
 
 				if(fd == -1)
 				{

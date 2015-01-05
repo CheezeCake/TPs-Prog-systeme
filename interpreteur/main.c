@@ -5,6 +5,7 @@
 #include <signal.h>
 #include <pwd.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include "command.h"
 #include "shell.h"
 
